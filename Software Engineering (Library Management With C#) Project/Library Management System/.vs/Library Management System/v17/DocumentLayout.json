@@ -1,0 +1,48 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\syeds\\OneDrive\\Desktop\\SE PROJECT\\Library Management System\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{5FFDE5D7-2608-4E98-9676-A07777C33E36}|Library Management System\\Library Management System.csproj|c:\\users\\syeds\\onedrive\\desktop\\se project\\library management system\\library management system\\updatelibrarian.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{5FFDE5D7-2608-4E98-9676-A07777C33E36}|Library Management System\\Library Management System.csproj|solutionrelative:library management system\\updatelibrarian.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 1,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedHeight": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{a80febb4-e7e0-4147-b476-21aaf2453969}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "UpdateLibrarian.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\syeds\\OneDrive\\Desktop\\SE PROJECT\\Library Management System\\Library Management System\\UpdateLibrarian.cs",
+              "RelativeDocumentMoniker": "Library Management System\\UpdateLibrarian.cs",
+              "ToolTip": "C:\\Users\\syeds\\OneDrive\\Desktop\\SE PROJECT\\Library Management System\\Library Management System\\UpdateLibrarian.cs [Design]",
+              "RelativeToolTip": "Library Management System\\UpdateLibrarian.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-13T11:36:37.105Z",
+              "EditorCaption": " [Design]"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

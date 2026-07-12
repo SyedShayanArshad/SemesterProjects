@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Compile Update="AddBookPage.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="AddDepartment.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="AddStudent.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="AddLibrarian.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="AdminChange.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="BookReport.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="LibrarianHome.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="BookIssueForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="BookReturnForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="IssueBookReport.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="LibrarianPenalty.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="LibrarianReport.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="LoginPage.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="MyAccount.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="ReturnBookReport.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="StudentBorrowed.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="StudentHome.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="StudentPenalty.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="StudentReport.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="StudentReturnBook.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="StudentViewBooks.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="UpdateLibrarian.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+</Project>
