@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation Logs | Adaptive Buffer Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            min-height: 100vh;
+        }
+        
+        .log-container {
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(to bottom, #ffffff, #f8fafc);
+        }
+        
+        .log-entry {
+            animation: fadeIn 0.5s ease-in-out;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .log-entry:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 2rgba(0,0,0,0.15), 0 8px 10px -5px rgba(0,0,0,0.1);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .log-info { 
+            border-left-color: #3b82f6;
+            background: linear-gradient(to right, #f8fafc, #f0f5ff);
+        }
+        .log-success { 
+            border-left-color: #10b981;
+            background: linear-gradient(to right, #f8fafc, #f0fdf4);
+        }
+        .log-warning { 
+            border-left-color: #f59e0b;
+            background: linear-gradient(to right, #f8fafc, #fffbeb);
+        }
+        .log-error { 
+            border-left-color: #ef4444;
+            background: linear-gradient(to right, #f8fafc, #fef2f2);
+        }
+        .log-policy { 
+            border-left-color: #8b5cf6;
+            background: linear-gradient(to right, #f8fafc, #f5f3ff);
+        }
+        
+        .header-gradient {
+            background: linear-gradient(135deg, #1e3a8a 0%, #4c1d95 100%);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 30px -10px rgba(0,0,0,0.2), 0 15px 15px -5px rgba(0,0,0,0.1);
+        }
+        
+        .filter-btn {
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .filter-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .filter-btn:hover::before {
+            left: 100%;
+        }
+        
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+        
+        .scrollbar-custom::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        .scrollbar-custom::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #cbd5e1, #94a3b8);
+            border-radius: 10px;
+        }
+        
+        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, #94a3b8, #64748b);
+        }
+        
+        .glow {
+            animation: glow 2s infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+            }
+            to {
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.9);
+            }
+        }
+        
+        .stats-card {
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            z-index: -1;
+            transition: all 1s;
+        }
+        
+        .stats-card:hover::before {
+            animation: shine 1.5s infinite;
+        }
+        
+        @keyframes shine {
+            0% {
+                top: -50%;
+                left: -50%;
+            }
+            100% {
+                top: 150%;
+                left: 150%;
+            }
+        }
+        
+        .pulse-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150%;
+            height: 150%;
+            border-radius: 50%;
+            border: 2px solid white;
+            opacity: 0;
+        }
+        
+        .pulse {
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+            }
+            
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+            }
+            
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+            }
+        }
+        
+        .log-time {
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
+            padding: 2px 8px;
+            background: linear-gradient(to right, #f3f4f6, #e5e7eb);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+    <!-- Header with Navigation -->
+    <header class="header-gradient text-white relative overflow-hidden">
+        <div class="absolute inset-0">
+            <div class="absolute inset-0 opacity-20">
+                <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+                    <defs>
+                        <pattern id="header-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+                            <path d="M0 20 L40 20 M20 0 L20 40" stroke="white" stroke-width="1" fill="none"/>
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#header-pattern)"/>
+                </svg>
+            </div>
+        </div>
+        <div class="container mx-auto py-8 px-6 flex justify-between items-center relative z-10">
+            <div>
+                <h1 class="text-4xl font-bold tracking-tight">
+                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-100 to-white">Simulation Logs</span>
+                </h1>
+                <p class="text-blue-200 text-opacity-90 font-light mt-1">Adaptive Buffer Management System</p>
+                <div class="mt-2 flex items-center">
+                    <span class="h-2 w-2 bg-green-400 rounded-full animate-pulse"></span>
+                    <span class="ml-2 text-sm text-blue-200">Live monitoring active</span>
+                </div>
+            </div>
+            <nav class="flex items-center space-x-4">
+                <span class="text-sm text-blue-200">
+                    <i class="fas fa-clock mr-1"></i> Last updated: <span id="current-time"></span>
+                </span>
+                <a href="/" class="relative overflow-hidden group bg-blue-700 hover:bg-blue-600 px-5 py-3 rounded-xl text-white font-medium transition-all duration-300 filter-btn">
+                    <span class="relative z-10 flex items-center">
+                        <i class="fas fa-arrow-left mr-2 transition-transform group-hover:-translate-x-1"></i> 
+                        Back to Dashboard
+                    </span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto py-10 px-6">
+        <!-- Log Controls -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-8 transform transition-all card-hover backdrop-blur-sm bg-opacity-90">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-5">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow">
+                        <i class="fas fa-clipboard-list text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">System Logs</h2>
+                        <!-- Removing the entries count display as requested -->
+                    </div>
+                </div>
+                
+                <!-- Removing the filter buttons section as requested -->
+            </div>
+        </div>
+
+        <!-- Log Display Area -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden card-hover backdrop-blur-sm bg-opacity-90">
+            <div class="border-b border-gray-200 bg-gradient-to-r from-gray-50 via-slate-50 to-gray-100 px-8 py-5 flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="bg-blue-100 p-3 rounded-full mr-4 pulse shadow-md shadow-blue-200">
+                        <i class="fas fa-history text-blue-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800 text-lg">Operation History</h3>
+                        <p class="text-sm text-gray-500 mt-0.5">Complete record of buffer actions and policy decisions</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="text-sm text-gray-600 flex items-center">
+                        <span class="h-2 w-2 bg-green-500 rounded-full mr-1.5"></span>
+                        Active
+                    </div>
+                    <button id="toggleLogView" class="text-sm text-blue-600 hover:text-blue-800 flex items-center transition-colors duration-200 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg">
+                        <i class="fas fa-expand-alt mr-2"></i>
+                        <span>Expand All</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Modified Log entries container with grouping of similar operations -->
+            <div class="log-container p-4 md:p-6 overflow-y-auto max-h-[calc(100vh-18rem)] scrollbar-custom bg-slate-50">
+                {% if stats.logs %}
+                    <div class="relative">
+                        <!-- Timeline line -->
+                        <div class="absolute left-7 top-8 bottom-8 w-0.5 bg-gradient-to-b from-blue-300 to-indigo-500 z-0 hidden md:block"></div>
+                        
+                        <!-- Group logs by operation type -->
+                        {% set grouped_logs = {} %}
+                        {% set unique_ids = [] %}
+                        {% set operation_counts = {} %}
+                        
+                        {% for log in stats.logs %}
+                            {% set operation_type = "" %}
+                            {% set operation_id = "" %}
+                            
+                            {% if 'HIT' in log %}
+                                {% set pageId = log.split('Page ')[1].split(' ')[0] if 'Page ' in log else '?' %}
+                                {% set operation_type = "hit" %}
+                                {% set operation_id = "hit-" + pageId %}
+                                {% set simplified_log = "Cache hit on Page " + pageId %}
+                            {% elif 'MISS' in log %}
+                                {% set pageId = log.split('Page ')[1].split(' ')[0] if 'Page ' in log else '?' %}
+                                {% set operation_type = "miss" %}
+                                {% set operation_id = "miss-" + pageId %}
+                                {% set simplified_log = "Cache miss on Page " + pageId %}
+                            {% elif 'evicted' in log and 'page' in log %}
+                                {% set pageId = log.split('evicted page ')[1].split(' ')[0] if 'evicted page ' in log else log.split('evicted ')[1].split(' ')[0] if 'evicted ' in log else '?' %}
+                                {% set operation_type = "eviction" %}
+                                {% set operation_id = "evict-" + pageId %}
+                                {% set simplified_log = "Evicted Page " + pageId %}
+                            {% elif 'Policy' in log %}
+                                {% set operation_type = "policy" %}
+                                {% set operation_id = "policy-" + stats.policy %}
+                                {% set simplified_log = "Policy changed to " + stats.policy %}
+                            {% else %}
+                                {% set operation_type = "info" %}
+                                {% set operation_id = "info-" + log[:20] %}
+                                {% set simplified_log = log %}
+                            {% endif %}
+                            
+                            {% if operation_id not in unique_ids %}
+                                {% set _ = unique_ids.append(operation_id) %}
+                                {% set _ = grouped_logs.update({operation_id: {'type': operation_type, 'log': log, 'count': 1, 'simplified': simplified_log, 'index': loop.index}}) %}
+                            {% else %}
+                                {% set _ = grouped_logs.update({operation_id: {'type': grouped_logs[operation_id]['type'], 'log': grouped_logs[operation_id]['log'], 'count': grouped_logs[operation_id]['count'] + 1, 'simplified': grouped_logs[operation_id]['simplified'], 'index': grouped_logs[operation_id]['index']}}) %}
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <div class="space-y-4">
+                        <!-- Display grouped operations -->
+                        {% for operation_id, op_info in grouped_logs.items() %}
+                            {% set log = op_info['log'] %}
+                            {% set count = op_info['count'] %}
+                            {% set simplified_log = op_info['simplified'] %}
+                            {% set type = op_info['type'] %}
+                            {% set index = op_info['index'] %}
+                            
+                            {% set log_class = 'border-blue-200 bg-white' %}
+                            {% set icon_class = 'fa-info-circle text-blue-500' %}
+                            {% set badge_class = 'bg-blue-100 text-blue-800' %}
+                            {% set icon_bg = 'bg-blue-100' %}
+                            
+                            {% if type == 'hit' %}
+                                {% set log_class = 'border-green-200 bg-white' %}
+                                {% set icon_class = 'fa-check-circle text-green-500' %}
+                                {% set badge_class = 'bg-green-100 text-green-800' %}
+                                {% set icon_bg = 'bg-green-100' %}
+                            {% elif type == 'miss' %}
+                                {% set log_class = 'border-red-200 bg-white' %}
+                                {% set icon_class = 'fa-times-circle text-red-500' %}
+                                {% set badge_class = 'bg-red-100 text-red-800' %}
+                                {% set icon_bg = 'bg-red-100' %}
+                            {% elif type == 'eviction' %}
+                                {% set log_class = 'border-amber-200 bg-white' %}
+                                {% set icon_class = 'fa-exclamation-triangle text-amber-500' %}
+                                {% set badge_class = 'bg-amber-100 text-amber-800' %}
+                                {% set icon_bg = 'bg-amber-100' %}
+                            {% elif type == 'policy' %}
+                                {% set log_class = 'border-purple-200 bg-white' %}
+                                {% set icon_class = 'fa-exchange-alt text-purple-500' %}
+                                {% set badge_class = 'bg-purple-100 text-purple-800' %}
+                                {% set icon_bg = 'bg-purple-100' %}
+                            {% endif %}
+                            
+                            <div class="flex items-start group" id="log-entry-{{ loop.index }}">
+                                <!-- Timeline dot -->
+                                <div class="relative flex-shrink-0 hidden md:flex items-center justify-center w-14">
+                                    <div class="h-4 w-4 rounded-full {{icon_bg}} border-2 border-white shadow-inner z-10 group-hover:scale-110 transition-all duration-200"></div>
+                                </div>
+                                
+                                <!-- Log entry card - Simplified version -->
+                                <div class="flex-grow log-entry rounded-lg border {{log_class}} p-3 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer" onclick="toggleDetails('details-{{ loop.index }}')">
+                                    <div class="flex items-center justify-between">
+                                        <!-- Type icon and simplified message with count badge -->
+                                        <div class="flex items-center space-x-3">
+                                            <div class="{{icon_bg}} p-1.5 rounded-lg shadow-sm">
+                                                <i class="fas {{icon_class}} text-sm"></i>
+                                            </div>
+                                            <span class="text-sm font-medium text-gray-700">{{ simplified_log }}</span>
+                                            <!-- Removing the count badge (2×) as requested -->
+                                        </div>
+                                        
+                                        <!-- Simple timestamp and expand button -->
+                                        <div class="flex items-center space-x-2">
+                                            {% set seconds = (index * 2.5)|round %}
+                                            <span class="text-xs text-gray-500">{{ (seconds // 60) }}:{{ "%02d"|format(seconds % 60) }} ago</span>
+                                            <button class="text-gray-400 hover:text-gray-600 focus:outline-none" aria-label="View details">
+                                                <i class="fas fa-chevron-down text-xs"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Collapsed details section (hidden by default) -->
+                                    <div id="details-{{ loop.index }}" class="mt-3 pt-2 border-t border-gray-100 hidden">
+                                        <!-- Full log message -->
+                                        <p class="text-xs text-gray-700 font-mono whitespace-pre-wrap">{{ log }}</p>
+                                        
+                                        <!-- Show operation count -->
+                                        {% if count > 1 %}
+                                        <div class="mt-2 text-xs text-gray-600">
+                                            <p class="font-medium flex items-center">
+                                                <i class="fas fa-clone mr-1.5"></i>
+                                                This operation occurred {{ count }} times in your logs
+                                            </p>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <!-- Additional context only when relevant -->
+                                        {% if 'HIT' in log or 'MISS' in log %}
+                                            <div class="flex flex-wrap gap-2 mt-2">
+                                                <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs text-gray-600">
+                                                    <i class="fas {% if 'read' in log %}fa-book-open{% else %}fa-edit{% endif %} mr-1"></i>
+                                                    Operation: {% if 'read' in log %}Read{% else %}Write{% endif %}
+                                                </span>
+                                                <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs text-gray-600">
+                                                    <i class="fas fa-bolt mr-1"></i>
+                                                    {{ (index * 0.025)|round(3) }}ms
+                                                </span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center py-16">
+                        <div class="inline-flex rounded-full bg-blue-100 p-5 mb-5 animate-pulse shadow-lg">
+                            <div class="rounded-full bg-blue-200 p-5">
+                                <i class="fas fa-database text-blue-600 text-3xl"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-700 mb-2">No logs available</h3>
+                        <p class="text-gray-500 max-w-lg mx-auto">Run a simulation from the main dashboard to generate operation logs and view them here.</p>
+                        <a href="/" class="mt-6 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 transition-colors focus:outline-none">
+                            <i class="fas fa-play mr-2"></i> Run Simulation Now
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="border-t border-gray-200 bg-gray-50 px-8 py-4 flex items-center justify-between">
+                <div class="text-sm text-gray-500">
+                    <i class="fas fa-info-circle mr-1"></i> 
+                    {% if stats.logs|length > 0 %}
+                        Showing {{ stats.logs|length }} entries from your simulation
+                    {% else %}
+                        No log entries to display
+                    {% endif %}
+                </div>
+                <a href="/" class="text-blue-600 hover:text-blue-800 text-sm font-semibold transition-colors duration-200 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg inline-flex items-center">
+                    <i class="fas fa-tachometer-alt mr-2"></i> Return to Dashboard
+                </a>
+            </div>
+        </div>
+        
+        <!-- Removing Summary Statistics Cards section as requested -->
+        
+    </main>
+    
+    <!-- Footer with helpful info -->
+    <footer class="bg-gray-800 text-gray-200 mt-12 py-8 px-6">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h4 class="text-xl font-semibold text-white">Adaptive Buffer Management System</h4>
+                    <p class="text-gray-400 mt-1">Intelligent caching system with dynamic policy selection</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="/" class="hover:text-white transition-colors">Dashboard</a>
+                    <a href="/logs" class="text-blue-300 hover:text-blue-200 transition-colors">System Logs</a>
+                    <a href="https://github.com/yourusername/buffer-management" class="hover:text-white transition-colors" target="_blank">
+                        <i class="fab fa-github mr-1"></i> GitHub
+                    </a>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-6 pt-6 flex justify-between items-center">
+                <p class="text-sm text-gray-400">&copy; <span id="current-year"></span> Buffer Management Project</p>
+                <div class="flex items-center">
+                    <span class="h-2 w-2 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
+                    <span class="text-sm text-gray-400">System online</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('current-time');
+            if (timeElement) {
+                timeElement.textContent = now.getHours().toString().padStart(2, '0') + ':' + 
+                                       now.getMinutes().toString().padStart(2, '0') + ':' + 
+                                       now.getSeconds().toString().padStart(2, '0');
+            }
+            
+            // Also update the year in the footer
+            const yearElement = document.getElementById('current-year');
+            if (yearElement) {
+                yearElement.textContent = now.getFullYear();
+            }
+        }
+        
+        // Initial update
+        updateTime();
+        
+        // Update every second
+        setInterval(updateTime, 1000);
+        
+        // Removing the filter functionality JavaScript code as requested
+        
+        // Function to toggle details visibility
+        function toggleDetails(detailsId) {
+            const details = document.getElementById(detailsId);
+            if (details) {
+                if (details.classList.contains('hidden')) {
+                    details.classList.remove('hidden');
+                    details.classList.add('block');
+                    // Change the icon to up arrow
+                    const parentEntry = details.closest('.log-entry');
+                    const chevron = parentEntry.querySelector('.fa-chevron-down, .fa-chevron-up');
+                    if (chevron) {
+                        chevron.classList.remove('fa-chevron-down');
+                        chevron.classList.add('fa-chevron-up');
+                    }
+                } else {
+                    details.classList.add('hidden');
+                    details.classList.remove('block');
+                    // Change the icon back to down arrow
+                    const parentEntry = details.closest('.log-entry');
+                    const chevron = parentEntry.querySelector('.fa-chevron-down, .fa-chevron-up');
+                    if (chevron) {
+                        chevron.classList.remove('fa-chevron-up');
+                        chevron.classList.add('fa-chevron-down');
+                    }
+                }
+            }
+        }
+        
+        // Toggle between compact and expanded view
+        let isExpanded = false;
+        document.getElementById('toggleLogView').addEventListener('click', () => {
+            const toggleButton = document.getElementById('toggleLogView');
+            const logEntries = document.querySelectorAll('.log-entry');
+            const detailsElements = document.querySelectorAll('[id^="details-"]');
+            
+            isExpanded = !isExpanded;
+            
+            if (isExpanded) {
+                // Show all details
+                detailsElements.forEach(detail => {
+                    detail.classList.remove('hidden');
+                    detail.classList.add('block');
+                });
+                
+                // Change all chevron icons to up
+                document.querySelectorAll('.fa-chevron-down').forEach(icon => {
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                });
+                
+                toggleButton.innerHTML = '<i class="fas fa-compress-alt mr-2"></i><span>Compact View</span>';
+            } else {
+                // Hide all details
+                detailsElements.forEach(detail => {
+                    detail.classList.add('hidden');
+                    detail.classList.remove('block');
+                });
+                
+                // Change all chevron icons to down
+                document.querySelectorAll('.fa-chevron-up').forEach(icon => {
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                });
+                
+                toggleButton.innerHTML = '<i class="fas fa-expand-alt mr-2"></i><span>Expand All</span>';
+            }
+        });
+        
+        // Auto refresh logs every minute
+        setInterval(() => {
+            // This would typically be an AJAX request to refresh logs
+            // For now, just update the "last updated" time
+            updateTime();
+        }, 60000);
+    </script>
+</body>
+</html>

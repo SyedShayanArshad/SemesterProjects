@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "COAL\\COAL.vcxproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Timer\\Timer.vcxproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

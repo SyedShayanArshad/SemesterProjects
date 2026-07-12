@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Audit Results</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='dist/output.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #e0e7ff 0%, #dbeafe 100%);
+      min-height: 100vh;
+      color: #1f2937;
+    }
+    .navbar {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    .card-effect {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .card-effect:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+    }
+    .btn-gradient {
+      background: linear-gradient(to right, #4f46e5, #3b82f6);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+    .btn-gradient:hover {
+      background: linear-gradient(to right, #4338ca, #2563eb);
+      transform: scale(1.02);
+      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.5);
+    }
+    .score-circle-large {
+      background: linear-gradient(135deg, #4f46e5, #3b82f6);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease;
+    }
+    .score-circle-large:hover {
+      transform: scale(1.05);
+    }
+    .accordion-header {
+      transition: background-color 0.3s ease;
+    }
+    .accordion-content {
+      transition: max-height 0.3s ease, opacity 0.3s ease;
+      opacity: 0;
+    }
+    .accordion-content.active {
+      opacity: 1;
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.8s ease-in-out;
+    }
+    .animate-slide-up {
+      animation: slideUp 0.5s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 3px;
+    }
+    /* Tab Styles */
+    .tab-active {
+      color: #4f46e5;
+      border-bottom: 2px solid #4f46e5;
+      font-weight: 600;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+  </style>
+</head>
+<body class="antialiased">
+  <div class="container mx-auto px-4 py-8 max-w-7xl">
+    <!-- Navigation -->
+    <nav class="navbar shadow-lg rounded-xl p-4 mb-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="bg-gradient-to-r from-indigo-600 to-blue-500 h-12 w-12 rounded-lg flex items-center justify-center text-white font-bold shadow-lg">
+            <i class="fas fa-shield-alt text-xl"></i>
+          </div>
+          <span class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-500">Privacy Audit Tool</span>
+        </div>
+        <div class="flex items-center space-x-6">
+          <a href="{{ url_for('index') }}" class="text-gray-700 hover:text-indigo-600 transition-colors font-medium">Home</a>
+          <a href="{{ url_for('profile') }}" class="text-gray-700 hover:text-indigo-600 transition-colors font-medium">Profile</a>
+          <a href="{{ url_for('logout') }}" class="text-red-600 hover:text-red-800 transition-colors font-medium">Logout</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="card-effect rounded-xl p-6 mb-8 animate-fade-in">
+      <div class="text-center">
+        <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Privacy Audit Results</h1>
+        <div class="flex justify-center space-x-4 text-sm text-gray-600 mb-6">
+          <span class="flex items-center"><i class="fas fa-globe mr-2"></i> {{ url }}</span>
+          <span class="flex items-center"><i class="fas fa-calendar mr-2"></i> {{ scan_date }}</span>
+        </div>
+        <div class="flex flex-col md:flex-row justify-center items-center gap-6">
+          <!-- Overall Score -->
+          <div class="flex items-center space-x-4 {{ results.overall_score_class }} card-effect p-4 rounded-lg">
+            <div class="score-circle-large relative w-24 h-24 flex items-center justify-center rounded-full text-white text-2xl font-bold">
+              <span class="score-number">{{ results.overall_score }}%</span>
+            </div>
+            <div class="text-left">
+              <span class="block text-lg font-semibold text-gray-800">{{ results.rating }}</span>
+              <span class="block text-sm text-gray-600">Overall Privacy Rating</span>
+            </div>
+          </div>
+          <!-- Action Buttons -->
+          <div class="flex flex-col space-y-2">
+            {% if current_user.is_premium %}
+              <a href="{{ url_for('download_report', report_id=report_id) }}" class="btn-gradient flex items-center justify-center text-white px-4 py-2 rounded-md" aria-label="Download PDF Report">
+                <i class="fas fa-file-pdf mr-2"></i> Download PDF Report
+              </a>
+            {% else %}
+              <button disabled class="bg-gray-400 cursor-not-allowed flex items-center justify-center text-white px-4 py-2 rounded-md opacity-70">
+                <i class="fas fa-file-pdf mr-2"></i> Download PDF Report
+              </button>
+              <div class="flex items-center mt-2 text-amber-600 text-sm">
+                <i class="fas fa-crown mr-2"></i>
+                <span>PDF reports are a premium feature</span>
+                <a href="{{ url_for('upgrade') }}" class="ml-2 underline font-medium">Upgrade Now</a>
+              </div>
+            {% endif %}
+            <a href="{{ url_for('index') }}#scan-form" class="flex items-center justify-center bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition" aria-label="Scan Another Website">
+              <i class="fas fa-search mr-2"></i> Scan Another Website
+            </a>
+            {% if not current_user.is_premium and 3 - current_user.audit_count <= 1 %}
+            <p class="text-sm text-amber-600 text-center mt-1">
+              <i class="fas fa-exclamation-circle mr-1"></i>
+              {% if 3 - current_user.audit_count <= 0 %}
+              No audits remaining. <a href="{{ url_for('upgrade') }}" class="font-medium underline">Upgrade</a> for unlimited audits.
+              {% else %}
+              Only {{ 3 - current_user.audit_count }} audit remaining.
+              {% endif %}
+            </p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <!-- Score Breakdown -->
+      <div class="mt-8">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-4 text-center">Compliance & Security Score Breakdown</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {% for category in ['gdpr', 'ccpa', 'privacy_policy', 'data_collection', 'form_security', 'sql_injection', 'ssl_security'] %}
+            <div class="card-effect p-4 rounded-lg animate-slide-up">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-medium text-gray-700">{{ category|replace('_', ' ')|title }}</span>
+                <span class="text-sm font-semibold {{ results[category].score_class }} px-2 py-1 rounded {{ 'bg-green-100 text-green-800' if results[category].score >= 80 else 'bg-yellow-100 text-yellow-800' if results[category].score >= 50 else 'bg-red-100 text-red-800' }}">
+                  {{ results[category].score }}%
+                </span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="h-2.5 rounded-full {{ 'bg-green-500' if results[category].score >= 80 else 'bg-yellow-500' if results[category].score >= 50 else 'bg-red-500' }}" style="width: {{ results[category].score }}%"></div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </header>
+
+    <!-- Tabs Navigation -->
+    <div class="card-effect rounded-xl p-4 mb-6">
+      <div class="overflow-x-auto scrollbar-thin">
+        <div class="flex space-x-1 min-w-max">
+          <button class="tab-btn px-4 py-2 text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer tab-active" data-tab="privacy-policy">
+            <i class="fas fa-file-contract mr-2"></i>Privacy Policy
+          </button>
+          <button class="tab-btn px-4 py-2 text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer" data-tab="data-collection">
+            <i class="fas fa-chart-bar mr-2"></i>Data Collection
+          </button>
+          <button class="tab-btn px-4 py-2 text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer" data-tab="form-security">
+            <i class="fas fa-shield-alt mr-2"></i>Form Security
+          </button>
+          <button class="tab-btn px-4 py-2 text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer" data-tab="sql-injection">
+            <i class="fas fa-bug mr-2"></i>SQL Injection
+          </button>
+          <button class="tab-btn px-4 py-2 text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer" data-tab="ssl-security">
+            <i class="fas fa-lock mr-2"></i>SSL/TLS Security
+          </button>
+          <button class="tab-btn px-4 py-2 text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer" data-tab="gdpr">
+            <i class="fas fa-gavel mr-2"></i>GDPR
+          </button>
+          <button class="tab-btn px-4 py-2 text-gray-700 hover:text-indigo-600 transition-colors cursor-pointer" data-tab="ccpa">
+            <i class="fas fa-balance-scale mr-2"></i>CCPA
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="space-y-8">
+      {% if current_user.is_premium %}
+        <!-- Privacy Policy Analysis -->
+        <section id="privacy-policy" class="tab-content active card-effect rounded-lg p-6 animate-slide-up">
+          <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center space-x-2">
+              <i class="fas fa-file-contract text-indigo-600"></i>
+              <h2 class="text-xl font-semibold text-gray-800">Privacy Policy Analysis</h2>
+            </div>
+            <span class="text-sm font-semibold {{ results.privacy_policy.score_class }} px-2 py-1 rounded {{ 'bg-green-100 text-green-800' if results.privacy_policy.score >= 80 else 'bg-yellow-100 text-yellow-800' if results.privacy_policy.score >= 50 else 'bg-red-100 text-red-800' }}">
+              {{ results.privacy_policy.score }}%
+            </span>
+          </div>
+          <div class="space-y-4">
+            {% if results.privacy_policy.found %}
+              <div class="flex items-center space-x-2">
+                <span class="text-sm font-medium text-gray-600">Privacy Policy URL:</span>
+                <a href="{{ results.privacy_policy.url }}" target="_blank" class="text-indigo-600 hover:underline flex items-center">
+                  {{ results.privacy_policy.url }} <i class="fas fa-external-link-alt ml-1"></i>
+                </a>
+              </div>
+              {% if results.privacy_policy.elements %}
+                <div>
+                  <h3 class="text-lg font-medium text-gray-800 mb-2">Policy Elements</h3>
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {% for element, present in results.privacy_policy.elements.items() %}
+                      <div class="flex items-center space-x-2 p-2 rounded {{ 'bg-green-50' if present else 'bg-red-50' }}">
+                        <i class="fas {{ 'fa-check text-green-600' if present else 'fa-times text-red-600' }}"></i>
+                        <span class="text-sm">{{ element|replace('_', ' ')|title }}</span>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+              {% if results.privacy_policy.readability %}
+                <div>
+                  <h3 class="text-lg font-medium text-gray-800 mb-2">Readability Score</h3>
+                  <div class="space-y-2">
+                    <div class="flex justify-between text-sm">
+                      <span>Flesch Reading Ease:</span>
+                      <span>{{ results.privacy_policy.readability.flesch_reading_ease }}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                      <div class="bg-indigo-500 h-2.5 rounded-full" style="width: {{ results.privacy_policy.readability.flesch_reading_ease }}%"></div>
+                    </div>
+                    <span class="text-sm text-gray-600">
+                      {% if results.privacy_policy.readability.flesch_reading_ease > 70 %}
+                        Easy to read
+                      {% elif results.privacy_policy.readability.flesch_reading_ease > 50 %}
+                        Moderately difficult
+                      {% else %}
+                        Difficult to read
+                      {% endif %}
+                    </span>
+                  </div>
+                </div>
+              {% endif %}
+            {% else %}
+              <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+                <div class="flex items-center">
+                  <i class="fas fa-exclamation-triangle text-red-600 mr-2"></i>
+                  <p class="text-sm text-red-700">No privacy policy found on the website. This is a critical issue that should be addressed immediately.</p>
+                </div>
+              </div>
+            {% endif %}
+            <div>
+              <h3 class="text-lg font-medium text-gray-800 mb-2"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Recommendations</h3>
+              <ul class="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                {% for rec in results.privacy_policy.recommendations %}
+                  <li>{{ rec }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </section>
+    
+        <!-- Data Collection Practices -->
+        <section id="data-collection" class="tab-content card-effect rounded-lg p-6 animate-slide-up">
+          <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center space-x-2">
+              <i class="fas fa-chart-bar text-indigo-600"></i>
+              <h2 class="text-xl font-semibold text-gray-800">Data Collection Practices</h2>
+            </div>
+            <span class="text-sm font-semibold {{ results.data_collection.score_class }} px-2 py-1 rounded {{ 'bg-green-100 text-green-800' if results.data_collection.score >= 80 else 'bg-yellow-100 text-yellow-800' if results.data_collection.score >= 50 else 'bg-red-100 text-red-800' }}">
+              {{ results.data_collection.score }}%
+            </span>
+          </div>
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Cookies Analysis -->
+              <div class="card-effect p-4 rounded-lg">
+                <h3 class="text-lg font-medium text-gray-800 mb-2">Cookies Analysis</h3>
+                <p class="text-sm text-gray-600 mb-2">
+                  <span class="font-medium">Total cookies detected:</span> {{ results.data_collection.cookies.total }}
+                </p>
+                {% if results.data_collection.cookies.total > 0 %}
+                  <div class="space-y-2">
+                    <p class="text-sm text-gray-600">
+                      <span class="font-medium">Necessary:</span> {{ results.data_collection.cookies.necessary }}
+                    </p>
+                    <p class="text-sm text-gray-600">
+                      <span class="font-medium">Functional:</span> {{ results.data_collection.cookies.functional }}
+                    </p>
+                    <p class="text-sm text-gray-600">
+                      <span class="font-medium">Analytics:</span> {{ results.data_collection.cookies.analytics }}
+                    </p>
+                    <p class="text-sm text-gray-600">
+                      <span class="font-medium">Advertising:</span> {{ results.data_collection.cookies.advertising }}
+                    </p>
+                    <p class="text-sm text-gray-600">
+                      <span class="font-medium">Unclassified:</span> {{ results.data_collection.cookies.unclassified }}
+                    </p>
+                    <div class="mt-2 flex items-center space-x-2 {{ 'text-green-600' if results.data_collection.cookies.consent.compliant else 'text-red-600' }}">
+                      <i class="fas {{ 'fa-check-circle' if results.data_collection.cookies.consent.compliant else 'fa-exclamation-circle' }}"></i>
+                      <span class="text-sm">{{ results.data_collection.cookies.consent.details }}</span>
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
+              <!-- Trackers Analysis -->
+              <div class="card-effect p-4 rounded-lg">
+                <h3 class="text-lg font-medium text-gray-800 mb-2">Trackers Analysis</h3>
+                <p class="text-sm text-gray-600 mb-2">
+                  <span class="font-medium">Total trackers detected:</span> {{ results.data_collection.tracker_count }}
+                </p>
+                {% if results.data_collection.tracker_count > 0 %}
+                  <div>
+                    <h4 class="text-sm font-medium text-gray-700 mb-2">Detected trackers:</h4>
+                    <ul class="space-y-2">
+                      {% for tracker in results.data_collection.trackers %}
+                        <li class="flex justify-between items-center text-sm">
+                          <span>{{ tracker.name }}</span>
+                          <span class="px-2 py-1 rounded text-xs {{ 'bg-indigo-100 text-indigo-800' if tracker.category == 'Analytics' else 'bg-red-100 text-red-800' }}">{{ tracker.category }}</span>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                {% else %}
+                  <p class="text-sm text-green-600">No third-party trackers were detected on this website.</p>
+                {% endif %}
+              </div>
+            </div>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800 mb-2"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Recommendations</h3>
+              <ul class="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                {% for rec in results.data_collection.recommendations %}
+                  <li>{{ rec }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </section>
+    
+        <!-- Form Security Analysis -->
+        <section id="form-security" class="tab-content card-effect rounded-lg p-6 animate-slide-up">
+          <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center space-x-2">
+              <i class="fas fa-shield-alt text-indigo-600"></i>
+              <h2 class="text-xl font-semibold text-gray-800">Form Security Analysis</h2>
+            </div>
+            <span class="text-sm font-semibold {{ results.form_security.score_class }} px-2 py-1 rounded {{ 'bg-green-100 text-green-800' if results.form_security.score >= 80 else 'bg-yellow-100 text-yellow-800' if results.form_security.score >= 50 else 'bg-red-100 text-red-800' }}">
+              {{ results.form_security.score }}%
+            </span>
+          </div>
+          <div class="space-y-4">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div class="text-center card-effect p-3 rounded-lg">
+                <span class="block text-lg font-semibold text-gray-800">{{ results.form_security.forms_found }}</span>
+                <span class="block text-sm text-gray-600">Forms Found</span>
+              </div>
+              <div class="text-center card-effect p-3 rounded-lg">
+                <span class="block text-lg font-semibold text-gray-800">{{ results.form_security.forms_with_sensitive_data }}</span>
+                <span class="block text-sm text-gray-600">With Sensitive Data</span>
+              </div>
+              <div class="text-center card-effect p-3 rounded-lg">
+                <span class="block text-lg font-semibold text-green-600">{{ results.form_security.secure_forms }}</span>
+                <span class="block text-sm text-gray-600">Secure Forms</span>
+              </div>
+              <div class="text-center card-effect p-3 rounded-lg">
+                <span class="block text-lg font-semibold text-red-600">{{ results.form_security.insecure_forms }}</span>
+                <span class="block text-sm text-gray-600">Insecure Forms</span>
+              </div>
+            </div>
+            {% if results.form_security.forms %}
+              <div>
+                <h3 class="text-lg font-medium text-gray-800 mb-2">Form Details</h3>
+                <div class="space-y-2">
+                  {% for form in results.form_security.forms %}
+                    {% if form.has_sensitive_data %}
+                      <div class="accordion-item border rounded-lg">
+                        <div class="accordion-header flex justify-between items-center p-3 bg-gray-50 cursor-pointer hover:bg-gray-100">
+                          <span>Form #{{ form.id }} - 
+                            <span class="px-2 py-1 rounded text-xs {{ 'bg-green-100 text-green-800' if form.is_secure else 'bg-red-100 text-red-800' }}">
+                              {{ 'Secure' if form.is_secure else 'Insecure' }}
+                            </span>
+                          </span>
+                          <i class="fas fa-chevron-down accordion-icon"></i>
+                        </div>
+                        <div class="accordion-content max-h-0 overflow-hidden">
+                          <div class="p-3 text-sm text-gray-600 space-y-2">
+                            <p><strong>Action:</strong> {{ form.action or "Current Page" }}</p>
+                            <p><strong>Method:</strong> {{ form.method }}</p>
+                            <p><strong>Sensitive Fields:</strong> 
+                              {% for input in form.inputs %}
+                                {% if input.is_sensitive %}
+                                  {{ input.name or input.type }}{% if not loop.last %}, {% endif %}
+                                {% endif %}
+                              {% endfor %}
+                            </p>
+                            {% if form.issues %}
+                              <div>
+                                <h4 class="text-sm font-medium text-gray-700">Security Issues:</h4>
+                                <ul class="list-disc pl-5 space-y-1">
+                                  {% for issue in form.issues %}
+                                    <li>{{ issue }}</li>
+                                  {% endfor %}
+                                </ul>
+                              </div>
+                            {% endif %}
+                          </div>
+                        </div>
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+            <div>
+              <h3 class="text-lg font-medium text-gray-800 mb-2"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Recommendations</h3>
+              <ul class="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                {% for rec in results.form_security.recommendations %}
+                  <li>{{ rec }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </section>
+    
+        <!-- SQL Injection Analysis -->
+        <section id="sql-injection" class="tab-content card-effect rounded-lg p-6 animate-slide-up">
+          <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center space-x-2">
+              <i class="fas fa-bug text-indigo-600"></i>
+              <h2 class="text-xl font-semibold text-gray-800">SQL Injection Analysis</h2>
+            </div>
+            <span class="text-sm font-semibold {{ results.sql_injection.score_class }} px-2 py-1 rounded {{ 'bg-green-100 text-green-800' if results.sql_injection.score >= 80 else 'bg-yellow-100 text-yellow-800' if results.sql_injection.score >= 50 else 'bg-red-100 text-red-800' }}">
+              {{ results.sql_injection.score }}%
+            </span>
+          </div>
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="text-center card-effect p-3 rounded-lg">
+                <span class="block text-lg font-semibold text-gray-800">{{ results.sql_injection.forms_tested }}</span>
+                <span class="block text-sm text-gray-600">Forms Tested</span>
+              </div>
+              <div class="text-center card-effect p-3 rounded-lg {{ 'bg-red-50' if results.sql_injection.vulnerable_forms > 0 else '' }}">
+                <span class="block text-lg font-semibold {{ 'text-red-600' if results.sql_injection.vulnerable_forms > 0 else 'text-gray-800' }}">{{ results.sql_injection.vulnerable_forms }}</span>
+                <span class="block text-sm text-gray-600">Vulnerable Forms</span>
+              </div>
+            </div>
+            {% if results.sql_injection.vulnerabilities %}
+              <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+                <div class="flex items-center mb-2">
+                  <i class="fas fa-exclamation-triangle text-red-600 mr-2"></i>
+                  <h3 class="text-lg font-medium text-red-700">SQL Injection Vulnerabilities Detected!</h3>
+                </div>
+                <p class="text-sm text-red-700 mb-2">The following forms contain potential SQL injection vulnerabilities:</p>
+                <div class="space-y-2">
+                  {% for vuln in results.sql_injection.vulnerabilities %}
+                    <div class="accordion-item border rounded-lg">
+                      <div class="accordion-header flex justify-between items-center p-3 bg-gray-50 cursor-pointer hover:bg-gray-100">
+                        <span>Form #{{ vuln.form_id }} - 
+                          <span class="px-2 py-1 rounded text-xs bg-red-100 text-red-800">Vulnerable</span>
+                        </span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                      </div>
+                      <div class="accordion-content max-h-0 overflow-hidden">
+                        <div class="p-3 text-sm text-gray-600 space-y-2">
+                          <p><strong>Field:</strong> {{ vuln.input_field }}</p>
+                          <p><strong>Vulnerability Type:</strong> {{ vuln.type }}</p>
+                          <p><strong>Test Payload:</strong> <code class="bg-gray-100 px-1 rounded">{{ vuln.payload }}</code></p>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% else %}
+              {% if results.sql_injection.forms_tested > 0 %}
+                <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+                  <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                    <p class="text-sm text-green-700">No SQL injection vulnerabilities were detected in the tested forms.</p>
+                  </div>
+                </div>
+              {% endif %}
+            {% endif %}
+            <div>
+              <h3 class="text-lg font-medium text-gray-800 mb-2"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Recommendations</h3>
+              <ul class="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                {% for rec in results.sql_injection.recommendations %}
+                  <li>{{ rec }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </section>
+    
+        <!-- SSL/TLS & Network Security -->
+        <section id="ssl-security" class="tab-content card-effect rounded-lg p-6 animate-slide-up">
+          <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center space-x-2">
+              <i class="fas fa-lock text-indigo-600"></i>
+              <h2 class="text-xl font-semibold text-gray-800">SSL/TLS & Network Security</h2>
+            </div>
+            <span class="text-sm font-semibold {{ results.ssl_security.score_class }} px-2 py-1 rounded {{ 'bg-green-100 text-green-800' if results.ssl_security.score >= 80 else 'bg-yellow-100 text-yellow-800' if results.ssl_security.score >= 50 else 'bg-red-100 text-red-800' }}">
+              {{ results.ssl_security.score }}%
+            </span>
+          </div>
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              <div class="card-effect p-3 rounded-lg text-center">
+                <h3 class="text-sm font-medium text-gray-700 mb-1">HTTPS Status</h3>
+                <div class="flex justify-center items-center space-x-2 {{ 'text-green-600' if results.ssl_security.https_enabled else 'text-red-600' }}">
+                  <i class="fas {{ 'fa-lock' if results.ssl_security.https_enabled else 'fa-lock-open' }}"></i>
+                  <span>{{ "Enabled" if results.ssl_security.https_enabled else "Not Enabled" }}</span>
+                </div>
+              </div>
+              <div class="card-effect p-3 rounded-lg text-center">
+                <h3 class="text-sm font-medium text-gray-700 mb-1">Certificate Valid</h3>
+                <div class="flex justify-center items-center space-x-2 {{ 'text-green-600' if results.ssl_security.certificate.valid else 'text-red-600' }}">
+                  <i class="fas {{ 'fa-certificate' if results.ssl_security.certificate.valid else 'fa-exclamation-circle' }}"></i>
+                  <span>{{ "Yes" if results.ssl_security.certificate.valid else "No" }}</span>
+                </div>
+              </div>
+              <div class="card-effect p-3 rounded-lg text-center">
+                <h3 class="text-sm font-medium text-gray-700 mb-1">HSTS</h3>
+                <div class="flex justify-center items-center space-x-2 {{ 'text-green-600' if results.ssl_security.security_headers.hsts else 'text-red-600' }}">
+                  <i class="fas fa-shield-alt"></i>
+                  <span>{{ "Enabled" if results.ssl_security.security_headers.hsts else "Not Enabled" }}</span>
+                </div>
+              </div>
+              <div class="card-effect p-3 rounded-lg text-center">
+                <h3 class="text-sm font-medium text-gray-700 mb-1">Mixed Content</h3>
+                <div class="flex justify-center items-center space-x-2 {{ 'text-green-600' if not results.ssl_security.insecure_content.mixed_content_found else 'text-red-600' }}">
+                  <i class="fas {{ 'fa-check-circle' if not results.ssl_security.insecure_content.mixed_content_found else 'fa-times-circle' }}"></i>
+                  <span>{{ "None" if not results.ssl_security.insecure_content.mixed_content_found else "Found" }}</span>
+                </div>
+              </div>
+            </div>
+            {% if results.ssl_security.https_enabled %}
+              <!-- Certificate Details -->
+              <div>
+                <h3 class="text-lg font-medium text-gray-800 mb-2">Certificate Details</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div class="card-effect p-3 rounded-lg">
+                    <span class="block text-sm font-medium text-gray-600">Issuer:</span>
+                    <span class="block text-sm text-gray-800">{{ results.ssl_security.certificate.issuer }}</span>
+                  </div>
+                  <div class="card-effect p-3 rounded-lg">
+                    <span class="block text-sm font-medium text-gray-600">Subject:</span>
+                    <span class="block text-sm text-gray-800">{{ results.ssl_security.certificate.subject }}</span>
+                  </div>
+                  <div class="card-effect p-3 rounded-lg">
+                    <span class="block text-sm font-medium text-gray-600">Expiry Date:</span>
+                    <span class="block text-sm text-gray-800">{{ results.ssl_security.certificate.expiry }}</span>
+                  </div>
+                  <div class="card-effect p-3 rounded-lg">
+                    <span class="block text-sm font-medium text-gray-600">Days Until Expiry:</span>
+                    <span class="block text-sm {{ 'text-red-600' if results.ssl_security.certificate.days_to_expiry < 30 else 'text-green-600' }}">{{ results.ssl_security.certificate.days_to_expiry }}</span>
+                  </div>
+                  <div class="card-effect p-3 rounded-lg">
+                    <span class="block text-sm font-medium text-gray-600">Algorithm:</span>
+                    <span class="block text-sm text-gray-800">{{ results.ssl_security.certificate.signature_algorithm }}</span>
+                  </div>
+                  <div class="card-effect p-3 rounded-lg">
+                    <span class="block text-sm font-medium text-gray-600">Version:</span>
+                    <span class="block text-sm text-gray-800">{{ results.ssl_security.certificate.version }}</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Security Headers -->
+              <div>
+                <h3 class="text-lg font-medium text-gray-800 mb-2">Security Headers</h3>
+                <div class="space-y-2">
+                  {% for header, enabled in {
+                    'Strict Transport Security (HSTS)': results.ssl_security.security_headers.hsts,
+                    'Content Security Policy': results.ssl_security.security_headers.content_security_policy,
+                    'X-Content-Type-Options': results.ssl_security.security_headers.x_content_type_options,
+                    'X-Frame-Options': results.ssl_security.security_headers.x_frame_options,
+                    'X-XSS-Protection': results.ssl_security.security_headers.x_xss_protection,
+                    'Referrer-Policy': results.ssl_security.security_headers.referrer_policy
+                  }.items() %}
+                    <div class="flex justify-between items-center card-effect p-3 rounded-lg">
+                      <span class="text-sm text-gray-700">{{ header }}</span>
+                      <span class="{{ 'text-green-600' if enabled else 'text-red-600' }}">
+                        <i class="fas {{ 'fa-check' if enabled else 'fa-times' }}"></i>
+                      </span>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+              <!-- Cookie Security -->
+              {% if results.ssl_security.secure_cookies.total_cookies > 0 %}
+                <div>
+                  <h3 class="text-lg font-medium text-gray-800 mb-2">Cookie Security</h3>
+                  <div class="space-y-4">
+                    <div class="card-effect p-3 rounded-lg">
+                      <span class="block text-sm font-medium text-gray-600">Total Cookies:</span>
+                      <span class="block text-sm text-gray-800">{{ results.ssl_security.secure_cookies.total_cookies }}</span>
+                    </div>
+                    <div class="space-y-2">
+                      {% for label, value, total in [
+                        ('Secure Cookies', results.ssl_security.secure_cookies.secure_cookies, results.ssl_security.secure_cookies.total_cookies),
+                        ('HttpOnly Cookies', results.ssl_security.secure_cookies.httponly_cookies, results.ssl_security.secure_cookies.total_cookies),
+                        ('SameSite Cookies', results.ssl_security.secure_cookies.samesite_cookies, results.ssl_security.secure_cookies.total_cookies)
+                      ] %}
+                        <div class="flex items-center space-x-4">
+                          <span class="text-sm font-medium text-gray-600">{{ label }}:</span>
+                          <div class="flex-1">
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                              <div class="bg-indigo-500 h-2.5 rounded-full" style="width: {{ (value / total * 100) | round }}%"></div>
+                            </div>
+                          </div>
+                          <span class="text-sm text-gray-800">{{ (value / total * 100) | round }}%</span>
+                        </div>
+                      {% endfor %}
+                    </div>
+                    {% if results.ssl_security.secure_cookies.insecure_cookies %}
+                      <div>
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Insecure Cookies</h4>
+                        <ul class="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                          {% for cookie in results.ssl_security.secure_cookies.insecure_cookies %}
+                            <li>{{ cookie.name }} - {{ cookie.issues|join(", ") }}</li>
+                          {% endfor %}
+                        </ul>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endif %}
+              <!-- Mixed Content -->
+              {% if results.ssl_security.insecure_content.mixed_content_found %}
+                <div>
+                  <h3 class="text-lg font-medium text-gray-800 mb-2">Mixed Content Issues</h3>
+                  {% for content_type, items in [
+                    ('Insecure Scripts', results.ssl_security.insecure_content.insecure_scripts),
+                    ('Insecure Stylesheets', results.ssl_security.insecure_content.insecure_stylesheets),
+                    ('Insecure Images', results.ssl_security.insecure_content.insecure_images)
+                  ] %}
+                    {% if items %}
+                      <div class="mb-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">{{ content_type }} ({{ items|length }})</h4>
+                        <ul class="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                          {% for item in items[:3] %}
+                            <li>{{ item }}</li>
+                          {% endfor %}
+                          {% if items|length > 3 %}
+                            <li class="text-gray-500">...and {{ items|length - 3 }} more</li>
+                          {% endif %}
+                        </ul>
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% else %}
+              <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+                <div class="flex items-center">
+                  <i class="fas fa-exclamation-triangle text-red-600 mr-2"></i>
+                  <p class="text-sm text-red-700">This website does not use HTTPS encryption. All data transmitted to and from this site is potentially visible to third parties.</p>
+                </div>
+              </div>
+            {% endif %}
+            <div>
+              <h3 class="text-lg font-medium text-gray-800 mb-2"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Recommendations</h3>
+              <ul class="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                {% for rec in results.ssl_security.recommendations %}
+                  <li>{{ rec }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </section>
+    
+        <!-- GDPR Compliance Analysis -->
+        <section id="gdpr" class="tab-content card-effect rounded-lg p-6 animate-slide-up">
+          <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center space-x-2">
+              <i class="fas fa-gavel text-indigo-600"></i>
+              <h2 class="text-xl font-semibold text-gray-800">GDPR Compliance Analysis</h2>
+            </div>
+            <span class="text-sm font-semibold {{ results.gdpr.score_class }} px-2 py-1 rounded {{ 'bg-green-100 text-green-800' if results.gdpr.score >= 80 else 'bg-yellow-100 text-yellow-800' if results.gdpr.score >= 50 else 'bg-red-100 text-red-800' }}">
+              {{ results.gdpr.score }}%
+            </span>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <h3 class="text-lg font-medium text-gray-800 mb-2">Key Findings</h3>
+              <ul class="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                {% for finding in results.gdpr.findings %}
+                  <li>{{ finding }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800 mb-2"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Recommendations</h3>
+              <ul class="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                {% for rec in results.gdpr.recommendations %}
+                  <li>{{ rec }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </section>
+    
+        <!-- CCPA Compliance Analysis -->
+        <section id="ccpa" class="tab-content card-effect rounded-lg p-6 animate-slide-up">
+          <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center space-x-2">
+              <i class="fas fa-balance-scale text-indigo-600"></i>
+              <h2 class="text-xl font-semibold text-gray-800">CCPA Compliance Analysis</h2>
+            </div>
+            <span class="text-sm font-semibold {{ results.ccpa.score_class }} px-2 py-1 rounded {{ 'bg-green-100 text-green-800' if results.ccpa.score >= 80 else 'bg-yellow-100 text-yellow-800' if results.ccpa.score >= 50 else 'bg-red-100 text-red-800' }}">
+              {{ results.ccpa.score }}%
+            </span>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <h3 class="text-lg font-medium text-gray-800 mb-2">Key Findings</h3>
+              <ul class="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                {% for finding in results.ccpa.findings %}
+                  <li>{{ finding }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+            <div>
+              <h3 class="text-lg font-medium text-gray-800 mb-2"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Recommendations</h3>
+              <ul class="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                {% for rec in results.ccpa.recommendations %}
+                  <li>{{ rec }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </section>
+      {% else %}
+        <!-- Premium Upgrade Prompt for Free Users -->
+        <section class="card-effect rounded-lg p-8 bg-gradient-to-r from-indigo-50 to-blue-50 flex flex-col items-center justify-center text-center animate-fade-in">
+          <div class="bg-gradient-to-r from-indigo-600 to-blue-500 h-16 w-16 rounded-full flex items-center justify-center text-white mb-4 shadow-lg">
+            <i class="fas fa-crown text-2xl"></i>
+          </div>
+          <h2 class="text-2xl font-semibold text-gray-800 mb-2">Unlock Detailed Audit Insights</h2>
+          <p class="text-sm text-gray-600 mb-6 max-w-md">
+            Upgrade to Premium to access in-depth analysis for Privacy Policy, Data Collection, Form Security, SQL Injection, SSL/TLS Security, GDPR, and CCPA compliance.
+          </p>
+          <a href="{{ url_for('upgrade') }}" class="btn-gradient flex items-center justify-center text-white px-6 py-3 rounded-md text-sm font-medium">
+            <i class="fas fa-rocket mr-2"></i> Upgrade to Premium Now
+          </a>
+        </section>
+      {% endif %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="card-effect rounded-xl p-6 mt-8">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="flex items-center space-x-3 mb-4 md:mb-0">
+          <div class="bg-gradient-to-r from-indigo-600 to-blue-500 h-10 w-10 rounded-lg flex items-center justify-center text-white font-bold shadow-lg">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <div>
+            <span class="block text-lg font-semibold text-gray-900">Privacy Audit Tool</span>
+            <p class="text-sm text-gray-600">© 2025 Information Security Project</p>
+          </div>
+        </div>
+        <div class="text-sm text-gray-600 text-center">
+          <p>Disclaimer: This report is provided for informational purposes only and should not be considered legal advice.</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Accordion functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const accordionHeaders = document.querySelectorAll('.accordion-header');
+      accordionHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+          const isActive = this.classList.contains('active');
+          
+          // Close all other accordions
+          document.querySelectorAll('.accordion-header').forEach(h => {
+            h.classList.remove('active');
+            const icon = h.querySelector('.accordion-icon');
+            if (icon) {
+              icon.classList.remove('fa-chevron-up');
+              icon.classList.add('fa-chevron-down');
+            }
+            const content = h.nextElementSibling;
+            content.style.maxHeight = null;
+            content.classList.remove('active');
+          });
+
+          // Toggle current accordion
+          if (!isActive) {
+            this.classList.add('active');
+            const icon = this.querySelector('.accordion-icon');
+            if (icon) {
+              icon.classList.remove('fa-chevron-down');
+              icon.classList.add('fa-chevron-up');
+            }
+            const content = this.nextElementSibling;
+            content.style.maxHeight = content.scrollHeight + 'px';
+            content.classList.add('active');
+          }
+        });
+      });
+
+      // Tab functionality
+      const tabButtons = document.querySelectorAll('.tab-btn');
+      const tabContents = document.querySelectorAll('.tab-content');
+      
+      tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          // Remove active class from all buttons and contents
+          tabButtons.forEach(btn => btn.classList.remove('tab-active'));
+          tabContents.forEach(content => content.classList.remove('active'));
+          
+          // Add active class to current button
+          this.classList.add('tab-active');
+          
+          // Show the corresponding content
+          const tabId = this.dataset.tab;
+          document.getElementById(tabId).classList.add('active');
+        });
+      });
+
+      // Animate elements on scroll
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-slide-up');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+
+      document.querySelectorAll('.card-effect').forEach(el => {
+        observer.observe(el);
+      });
+    });
+  </script>
+</body>
+</html>

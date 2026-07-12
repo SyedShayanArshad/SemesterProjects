@@ -1,0 +1,3 @@
+flask==2.2.3
+pyodbc==4.0.35
+reportlab==3.6.12

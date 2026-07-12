@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Buffer Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-7xl mx-auto space-y-8">
+        <div>
+            <h1 class="text-4xl font-bold text-blue-800 mb-2">Adaptive Buffer Management System</h1>
+            <p class="text-gray-600">A dynamic caching system that switches policies based on workload patterns</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-lg shadow-md space-y-4">
+                <h2 class="text-2xl font-semibold text-gray-800">Simulation Control</h2>
+                <form method="POST">
+                    <label for="run_count" class="block text-gray-700">Number of Iterations</label>
+                    <input type="number" name="run_count" id="run_count" required min="1"
+                        placeholder="e.g. 20"
+                        class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    
+                    <label for="cache_size" class="block text-gray-700 mt-4">Cache Size</label>
+                    <input type="number" name="cache_size" id="cache_size" required min="1"
+                        placeholder="e.g. 5"
+                        class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    
+                    <div class="grid grid-cols-2 gap-4 mt-6">
+                        <button type="submit"
+                            class="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white py-3 rounded-lg w-full font-medium shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                            <div class="flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                                </svg>
+                                Start Simulation
+                            </div>
+                        </button>
+                        <a href="/reset" class="inline-block">
+                            <button type="button" 
+                                class="bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white py-3 rounded-lg w-full font-medium shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                                <div class="flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                                    </svg>
+                                    Reset Cache
+                                </div>
+                            </button>
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            {% if stats and stats.size >= 0 %}
+            <div class="bg-gradient-to-br from-white to-blue-50 p-6 rounded-lg shadow-md border border-blue-100">
+                <h2 class="text-2xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mr-2 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                    </svg>
+                    Current Status
+                </h2>
+                
+                <!-- Add Current Run Results box with clear hit/miss stats -->
+                {% if stats.current_run %}
+                <div class="bg-blue-50 p-4 rounded-lg mb-6 border border-blue-200">
+                    <h3 class="text-lg font-bold text-blue-800 mb-3">Current Run Results</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-white p-4 rounded shadow-sm border border-blue-100">
+                            <p class="text-sm text-gray-600">Operations</p>
+                            <p class="text-2xl font-bold text-gray-800">{{ stats.current_run.operations }}</p>
+                        </div>
+                        <div class="bg-white p-4 rounded shadow-sm border border-green-100">
+                            <p class="text-sm text-gray-600">Hits</p>
+                            <p class="text-2xl font-bold text-green-600">{{ stats.current_run.hits }}</p>
+                        </div>
+                        <div class="bg-white p-4 rounded shadow-sm border border-red-100">
+                            <p class="text-sm text-gray-600">Misses</p>
+                            <p class="text-2xl font-bold text-red-600">{{ stats.current_run.misses }}</p>
+                        </div>
+                        <div class="bg-white p-4 rounded shadow-sm border border-blue-100">
+                            <p class="text-sm text-gray-600">Hit Rate</p>
+                            <p class="text-2xl font-bold text-blue-600">{{ stats.current_run.hit_rate|round(1) }}%</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Overall statistics section with clearer display -->
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">Overall Statistics</h3>
+                <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <p><strong>Total Hits:</strong></p>
+                            <span class="text-green-600 font-semibold text-lg">{{ stats.hits }}</span>
+                        </div>
+                        <div class="flex items-center justify-between mt-2">
+                            <p><strong>Total Misses:</strong></p>
+                            <span class="text-red-600 font-semibold text-lg">{{ stats.misses }}</span>
+                        </div>
+                        <div class="flex items-center justify-between mt-2">
+                            <p><strong>Current Policy:</strong></p>
+                            <span class="text-blue-600 font-semibold">{{ stats.policy }}</span>
+                        </div>
+                        <div class="flex items-center justify-between mt-2">
+                            <p><strong>Cache Size:</strong></p>
+                            <span class="text-purple-600 font-semibold">{{ stats.size }}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <p><strong>Overall Hit Rate:</strong></p>
+                            <span class="text-indigo-600 font-semibold text-lg">
+                                {{ (stats.hits / (stats.hits + stats.misses) * 100)|round(2) if stats.hits + stats.misses > 0 else 0 }}%
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between mt-2">
+                            <p><strong>Read/Write:</strong></p>
+                            <span class="text-indigo-600 font-semibold">
+                                {{ stats.read_count }}/{{ stats.write_count }}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between mt-2">
+                            <p><strong>Workload Type:</strong></p>
+                            <span class="text-orange-600 font-semibold">{{ stats.workload_type }}</span>
+                        </div>
+                        <div class="flex items-center justify-between mt-2">
+                            <p><strong>Total Evictions:</strong></p>
+                            <span class="text-rose-600 font-semibold">
+                                {{ stats.eviction_counts.LRU + stats.eviction_counts.MRU + stats.eviction_counts.LFU }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if stats %}
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Policy Switch Over Time</h2>
+            <div id="chartContainer" class="w-full h-64">
+                <canvas id="policyChart"></canvas>
+            </div>
+
+            <div class="mt-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Hit vs Miss Performance</h2>
+                <div class="w-full h-64">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Eviction Analysis Section - Stacked vertically -->
+        <div class="bg-white p-6 rounded-lg shadow-md space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mr-3 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Eviction Analysis
+            </h2>
+            
+            <!-- 1. Eviction Distribution Summary -->
+            <div class="bg-white rounded-xl border border-gray-200 shadow p-5">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Eviction Distribution</h3>
+                
+                <div class="flex flex-col md:flex-row">
+                    <!-- Distribution Stats -->
+                    <div class="flex-1">
+                        <div class="grid grid-cols-3 gap-4 mb-4">
+                            <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 flex flex-col">
+                                <span class="text-sm text-gray-600">LRU Evictions</span>
+                                <span class="text-2xl font-bold text-blue-700">{{ stats.eviction_counts.LRU }}</span>
+                            </div>
+                            <div class="bg-purple-50 border border-purple-100 rounded-lg p-3 flex flex-col">
+                                <span class="text-sm text-gray-600">MRU Evictions</span>
+                                <span class="text-2xl font-bold text-purple-700">{{ stats.eviction_counts.MRU }}</span>
+                            </div>
+                            <div class="bg-amber-50 border border-amber-100 rounded-lg p-3 flex flex-col">
+                                <span class="text-sm text-gray-600">LFU Evictions</span>
+                                <span class="text-2xl font-bold text-amber-700">{{ stats.eviction_counts.LFU }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-50 border border-gray-100 rounded-lg p-3 flex justify-between items-center">
+                            <span class="text-gray-600">Total Evictions:</span>
+                            <span class="text-xl font-bold text-gray-800">
+                                {{ stats.eviction_counts.LRU + stats.eviction_counts.MRU + stats.eviction_counts.LFU }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Eviction Chart -->
+                    <div class="flex-1 mt-4 md:mt-0 md:ml-4 h-64">
+                        <canvas id="evictionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 3. Page Eviction History Table -->
+            <div class="bg-white rounded-xl border border-gray-200 shadow p-5">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Page Eviction History</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-sm text-gray-500">
+                        {% if stats.eviction_history and stats.eviction_history|length > 0 %}
+                            Showing {{ stats.eviction_history|length }} eviction records
+                        {% else %}
+                            No eviction records available
+                        {% endif %}
+                    </span>
+                    <a href="/download_eviction_history" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-2 px-4 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                        Download as PDF
+                    </a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full border border-collapse border-gray-200">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">#</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Page ID</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Eviction Policy</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Reason</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Access Count</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% if stats.eviction_history and stats.eviction_history|length > 0 %}
+                                {% for eviction in stats.eviction_history|reverse %}
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ loop.index }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ eviction.page }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">
+                                            <!-- Make sure we're displaying policy properly with fallback -->
+                                            <span class="px-2 py-1 text-xs rounded-full
+                                                {% if eviction.policy == 'LRU' %} bg-blue-100 text-blue-800
+                                                {% elif eviction.policy == 'MRU' %} bg-purple-100 text-purple-800
+                                                {% elif eviction.policy == 'LFU' %} bg-amber-100 text-amber-800
+                                                {% else %} bg-gray-100 text-gray-800 {% endif %}">
+                                                {{ eviction.policy if eviction.policy else "Unknown" }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-600">{{ eviction.reason }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap text-center">{{ eviction.access_count }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="px-4 py-4 text-center text-gray-500">No evictions have occurred yet.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md transition-all hover:shadow-lg">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                </svg>
+                Current Cache Content
+            </h2>
+            
+            <div class="overflow-hidden rounded-lg border border-gray-200 shadow-sm">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr class="bg-gradient-to-r from-blue-50 to-indigo-50">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Page ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Access Count</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Access Frequency</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% if stats.buffer|length > 0 %}
+                            {% for item in stats.buffer %}
+                            {% set access_count = stats.access_count[item|string]|default(0) %}
+                            {% set max_access = stats.access_count.values()|list|sort|last if stats.access_count.values()|list|length > 0 else 1 %}
+                            {% set percentage = (access_count / max_access * 100) if max_access > 0 else 0 %}
+                            <tr class="hover:bg-blue-50 transition-colors duration-150 ease-in-out">
+                                <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-800">{{ item }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        {{ access_count }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 overflow-hidden">
+                                        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 h-2.5 rounded-full" 
+                                             style="width: {{ percentage }}%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="3" class="px-6 py-8 text-center">
+                                    <div class="flex flex-col items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                                        </svg>
+                                        <p class="text-gray-500 font-medium">Buffer is empty. No pages have been loaded yet.</p>
+                                        <p class="text-gray-400 text-sm mt-1">Run a simulation to load pages into the cache.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if stats.buffer|length > 0 %}
+            <div class="mt-4 text-sm text-gray-500 italic flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                </svg>
+                Showing {{ stats.buffer|length }} of {{ stats.size }} maximum cache entries
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+                Simulation Logs
+            </h2>
+            
+            <div class="flex flex-col">
+                {% if stats.logs %}
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-gray-700 font-medium">Recent Activity</span>
+                                <p class="text-sm text-gray-500">{{ stats.logs|length }} operations logged</p>
+                            </div>
+                            <div>
+                                <span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">Latest logs</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3 space-y-2">
+                            {% for log in stats.logs[-3:] %}
+                                <div class="py-2 border-b border-gray-100 last:border-0">
+                                    <p class="text-gray-600 text-sm">{{ log }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <a href="/logs" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 px-4 rounded-lg text-center font-medium transition-all duration-200 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+                        </svg>
+                        View Complete Logs
+                    </a>
+                {% else %}
+                    <div class="bg-gray-50 rounded-lg p-8 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p class="text-gray-600 mb-2">No logs available yet</p>
+                        <p class="text-gray-500 text-sm">Run the simulation to generate operation logs</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">LRU Policy</h3>
+                <p class="text-gray-600">Least Recently Used (LRU) replaces the page that hasn't been used for the longest period of time.</p>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">MRU Policy</h3>
+                <p class="text-gray-600">Most Recently Used (MRU) replaces the most recently accessed page.</p>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">LFU Policy</h3>
+                <p class="text-gray-600">Least Frequently Used (LFU) replaces the page that has been accessed the least.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if stats %}
+    <script>
+        // Policy Chart
+        const ctx = document.getElementById('policyChart').getContext('2d');
+        const chartData = {{ policy_data|tojson|safe }};
+        const labels = Array.from({ length: chartData.length }, (_, i) => i);
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Policy Used',
+                    data: chartData,
+                    fill: false,
+                    borderColor: 'rgb(37, 99, 235)',
+                    borderWidth: 2,
+                    tension: 0.1,
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const policies = ['LRU', 'MRU', 'LFU'];
+                                const value = context.raw;
+                                return `Policy: ${policies[value]}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: function(value) {
+                                const policies = ['LRU', 'MRU', 'LFU'];
+                                return policies[value];
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Performance Chart
+        const perfCtx = document.getElementById('performanceChart').getContext('2d');
+        const hits = {{ stats.hits|default(0) }};
+        const misses = {{ stats.misses|default(0) }};
+        const totalOps = hits + misses;
+        
+        const hitRate = totalOps > 0 ? (hits / totalOps * 100).toFixed(1) : 0;
+        const missRate = totalOps > 0 ? (misses / totalOps * 100).toFixed(1) : 0;
+        
+        new Chart(perfCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [`Hits: ${hits} (${hitRate}%)`, `Misses: ${misses} (${missRate}%)`],
+                datasets: [{
+                    data: [hits, misses],
+                    backgroundColor: [
+                        'rgba(34, 197, 94, 0.8)',  // Green for hits
+                        'rgba(239, 68, 68, 0.8)'   // Red for misses
+                    ],
+                    borderColor: [
+                        'rgba(34, 197, 94, 1)',
+                        'rgba(239, 68, 68, 1)'
+                    ],
+                    borderWidth: 1,
+                    hoverOffset: 15
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            font: {
+                                size: 14
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const percentage = totalOps > 0 ? ((value / totalOps) * 100).toFixed(1) : 0;
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Cache Hit/Miss Ratio',
+                        font: {
+                            size: 16
+                        }
+                    }
+                },
+                animation: {
+                    animateScale: true,
+                    animateRotate: true
+                }
+            }
+        });
+
+        {% if stats.eviction_counts %}
+        // Eviction Distribution Chart - only if the element exists
+        const evictionChart = document.getElementById('evictionChart');
+        if (evictionChart) {
+            const evictionCtx = evictionChart.getContext('2d');
+            const lruCount = {{ stats.eviction_counts.LRU|default(0) }};
+            const mruCount = {{ stats.eviction_counts.MRU|default(0) }};
+            const lfuCount = {{ stats.eviction_counts.LFU|default(0) }};
+            const evictionData = [lruCount, mruCount, lfuCount];
+            
+            new Chart(evictionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['LRU', 'MRU', 'LFU'],
+                    datasets: [{
+                        data: evictionData,
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)',  // blue for LRU
+                            'rgba(139, 92, 246, 0.8)',  // purple for MRU
+                            'rgba(16, 185, 129, 0.8)'   // green for LFU
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(139, 92, 246, 1)',
+                            'rgba(16, 185, 129, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        {% endif %}
+    </script>
+    {% endif %}
+</body>
+</html>

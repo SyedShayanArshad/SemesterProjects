@@ -1,0 +1,51 @@
+========================================================
+   Proxy Server Cache Performance Analysis Report
+========================================================
+
+This report presents a comparative analysis of three
+cache management strategies based on observed runtime
+behavior and analytical estimation:
+
+1) Simple Cache (No LFU, No Aging)
+2) Cache with LFU (Without Aging)
+3) Cache with Adaptive LFU (Implemented System)
+
+URL: http://github.com/
+--------------------------------------------------------
+Access Count      : 2
+First Access Time : Tue Dec 30 21:33:25 2025
+Last Access Time  : Tue Dec 30 21:33:25 2025
+Active Duration   : 2 seconds
+
++---------------------------+-------+--------+-------------+
+| Cache Strategy            | Hits  | Misses | Avg Latency |
++---------------------------+-------+--------+-------------+
+| Simple Cache              |     0 |      2 |     0.182 ms |
+| LFU Cache (No Aging)      |     0 |      2 |     0.139 ms |
+| Adaptive LFU (Implemented)|     1 |      1 |     0.150 ms |
++---------------------------+-------+--------+-------------+
+
+URL: http://example.com/
+--------------------------------------------------------
+Access Count      : 3
+First Access Time : Tue Dec 30 21:33:28 2025
+Last Access Time  : Tue Dec 30 21:33:28 2025
+Active Duration   : 4 seconds
+
++---------------------------+-------+--------+-------------+
+| Cache Strategy            | Hits  | Misses | Avg Latency |
++---------------------------+-------+--------+-------------+
+| Simple Cache              |     1 |      2 |     0.244 ms |
+| LFU Cache (No Aging)      |     1 |      2 |     0.182 ms |
+| Adaptive LFU (Implemented)|     2 |      1 |     0.178 ms |
++---------------------------+-------+--------+-------------+
+
+========================================================
+Conclusion
+========================================================
+The Adaptive LFU cache demonstrates superior performance
+compared to both simple caching and basic LFU strategies.
+By combining frequency tracking with aging, the system
+efficiently adapts to changing access patterns and
+minimizes response latency.
+

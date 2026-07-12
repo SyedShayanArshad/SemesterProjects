@@ -1,0 +1,49 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\syeds\\OneDrive\\Desktop\\DSA Project\\Project1\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{426A2FFD-8B35-48E7-857A-8FFC36A8EA3E}|Project1\\Project1.vcxproj|C:\\Users\\syeds\\OneDrive\\Desktop\\DSA Project\\Project1\\Project1\\source.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{426A2FFD-8B35-48E7-857A-8FFC36A8EA3E}|Project1\\Project1.vcxproj|solutionrelative:Project1\\source.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 1,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedHeight": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{a80febb4-e7e0-4147-b476-21aaf2453969}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "source.cpp",
+              "DocumentMoniker": "C:\\Users\\syeds\\OneDrive\\Desktop\\DSA Project\\Project1\\Project1\\source.cpp",
+              "RelativeDocumentMoniker": "Project1\\source.cpp",
+              "ToolTip": "C:\\Users\\syeds\\OneDrive\\Desktop\\DSA Project\\Project1\\Project1\\source.cpp",
+              "RelativeToolTip": "Project1\\source.cpp",
+              "ViewState": "AgIAAMMDAAAAAAAAAAAuwNMDAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-12-17T03:14:21.186Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
