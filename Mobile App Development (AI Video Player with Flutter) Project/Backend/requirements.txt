@@ -1,0 +1,19 @@
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+python-multipart>=0.0.9
+
+# OpenAI Whisper (requires FFmpeg installed on PATH)
+openai-whisper>=20231117
+
+# Audio processing
+librosa>=0.10.0
+soundfile>=0.12.0
+
+# Used only when target_language is not English.
+deep-translator>=1.11.4
+
+# Firebase Cloud Messaging for push notifications
+firebase-admin>=6.4.0
+uvicorn
+fastapi
+edge-tts

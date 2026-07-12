@@ -1,0 +1,98 @@
+name: cinekit
+description: "A feature-rich Flutter video player app."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # Video playback
+  media_kit: ^1.1.11
+  media_kit_video: ^1.2.5
+  media_kit_libs_video: ^1.0.5
+
+  # File picking & permissions
+  file_picker: ^8.1.2
+  permission_handler: ^11.3.1
+
+  # MediaStore access (proper Android video scanning)
+  photo_manager: ^3.6.3
+
+  # Persistence
+  shared_preferences: ^2.3.2
+  hive_flutter: ^1.1.0
+
+  # State management
+  provider: ^6.1.2
+
+  # Device controls
+  wakelock_plus: ^1.2.10
+  screen_brightness: ^0.2.2+1
+  volume_controller: ^2.0.7+1
+
+  # Thumbnail generation
+  video_thumbnail: ^0.5.3
+
+  # File utilities
+  path: ^1.9.0
+  path_provider: ^2.1.4
+  uuid: ^4.0.0
+
+  # HTTP client (for backend communication)
+  http: ^1.2.2
+
+  # Ads (Google AdMob)
+  google_mobile_ads: ^6.0.0
+
+  # FFmpeg (audio extraction from video)
+  ffmpeg_kit_flutter_new: ^4.1.0
+
+  # Sharing & device info
+  share_plus: ^10.0.2
+  device_info_plus: ^10.1.2
+
+  # Color picker (subtitle color)
+  flutter_colorpicker: ^1.1.0
+
+  # Formatting
+  intl: ^0.19.0
+  firebase_core: ^4.7.0
+  firebase_auth: ^6.4.0
+  cloud_firestore: ^6.3.0
+  google_sign_in: ^7.2.0
+  encrypt: ^5.0.3
+
+  # Background Tasks & Notifications
+  workmanager: ^0.7.0
+  firebase_messaging: 16.2.0
+  flutter_local_notifications: ^17.1.0
+  event_bus: ^2.0.0
+  connectivity_plus: ^6.0.0
+
+  # Logging and Profiling
+  logger: ^2.4.0
+  firebase_crashlytics: any
+  firebase_performance: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.0
+
+flutter_launcher_icons:
+  image_path: "assets/logo.png"
+  android: true
+  ios: true
+  remove_alpha_ios: true
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+
